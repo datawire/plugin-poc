@@ -18,9 +18,9 @@ rules:
   verbs: ["get", "list", "watch"]
 - apiGroups: ["getambassador.io"]
   resources:
-  - policies
+  - filters
   - ratelimits
-  - middlewares
+  - filterpolicies
   verbs: ["get", "list", "watch"]
 ---
 apiVersion: v1
@@ -48,40 +48,40 @@ subjects:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: policies.getambassador.io
+  name: filterpolicies.getambassador.io
 spec:
   group: getambassador.io
-  version: v1beta1
+  version: v1beta2
   versions:
-  - name: v1beta1
+  - name: v1beta2
     served: true
     storage: true
   scope: Namespaced
   names:
-    plural: policies
-    singular: policy
-    kind: Policy
+    plural: filterpolicies
+    singular: filterpolicy
+    kind: FilterPolicy
     shortNames:
-    - pol
+    - fp
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: middlewares.getambassador.io
+  name: filters.getambassador.io
 spec:
   group: getambassador.io
-  version: v1beta1
+  version: v1beta2
   versions:
-  - name: v1beta1
+  - name: v1beta2
     served: true
     storage: true
   scope: Namespaced
   names:
-    plural: middlewares
-    singular: middleware
-    kind: Middleware
+    plural: filters
+    singular: filter
+    kind: Filter
     shortNames:
-    - mw
+    - fil
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -173,7 +173,7 @@ spec:
       serviceAccountName: ambassador
       containers:
       - name: ambassador
-        image: quay.io/datawire/ambassador:0.50.2
+        image: quay.io/datawire/ambassador:0.50.3
         resources:
           limits:
             cpu: 1
@@ -208,7 +208,7 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 3
       - name: ambassador-pro
-        image: richarddli/amb-sidecar-plugin:b8f1f1d-dirty
+        image: richarddli/amb-sidecar-plugin:d546cef-dirty
         ports:
         - name: ratelimit-grpc
           containerPort: 8081
