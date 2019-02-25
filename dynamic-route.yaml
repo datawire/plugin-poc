@@ -1,17 +1,17 @@
 ---
-apiVersion: getambassador.io/v1beta1
-kind: Middleware
+apiVersion: getambassador.io/v1beta2
+kind: Filter
 metadata:
-  name: param-plugin # how to refer to the plugin in the Policy CRD
+  name: param-filter # how to refer to the plugin in the Policy CRD
   namespace: default
 spec:
   Plugin:
     name: param-plugin # The plugin's `.so` file's base name
 ---
-apiVersion: getambassador.io/v1beta1
-kind: Policy
+apiVersion: getambassador.io/v1beta2
+kind: FilterPolicy
 metadata:
-  name: httpbin-policy
+  name: test-filterpolicy
   namespace: default
 spec:
   # everything defaults to private; you can create rules to make stuff
@@ -20,20 +20,17 @@ spec:
   rules:
   - host: "*"
     path: /test/*
-    public: false # must be false if using a middleware
-    middleware:
-      name: param-plugin
+    filters:
+    - name: param-filter
   - host: "*"
     path: /httpbin/*
-    public: false # must be false if using a middleware
-    middleware:
-      name: param-plugin
+    filters: null
   - host: "*"
     path: /qotm/*
-    public: true
+    filters: null
   - host: "*"
     path: /microdonut/*
-    public: true
+    filters: null
   - host: "*"
     path: /zipkin/*
-    public: true
+    filters: null
