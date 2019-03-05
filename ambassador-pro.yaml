@@ -208,7 +208,7 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 3
       - name: ambassador-pro
-        image: richarddli/amb-sidecar-plugin:d546cef-dirty
+        image: richarddli/amb-sidecar-plugin:637bcba-dirty
         ports:
         - name: ratelimit-grpc
           containerPort: 8081
