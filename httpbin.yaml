@@ -36,6 +36,13 @@ metadata:
       prefix: /httpbin/
       service: httpbin.org:80
       host_rewrite: httpbin.org   
+      ---
+      apiVersion: ambassador/v1
+      kind:  Mapping
+      name:  jwt_httpbin_mapping
+      prefix: /jwt-httpbin/
+      service: httpbin.org:80
+      host_rewrite: httpbin.org 
 spec:
   ports:
   - name: httpbin

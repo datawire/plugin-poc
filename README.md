@@ -241,6 +241,43 @@ We'll now set up a custom Filter that will dynamically route between the QOTM se
 
    Note that if the value is odd, you will go to QoTM service (you'll see a JSON blob). If the value is even, you will go to the microdonuts application (you'll see a stream of HTML). Note that both of these services are in the service mesh.
 
+## JWT
+
+1. Configure the JWT filter:
+
+   ```
+   kubectl apply -f jwt-filter.yaml
+   kubectl apply -f ambassador-pro-auth.yaml
+   ```
+
+2. Send a valid JWT to the `jwt-httpbin` URL:
+
+   ```
+   curl -i --header "Authorization: Bearer eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ." $AMBASSADOR_IP/jwt-httpbin/ip
+   ```
+
+3. Send an invalid JWT, and get a 401:
+
+   ```
+   curl -i $AMBASSADOR_IP/jwt-httpbin/ip
+   HTTP/1.1 401 Unauthorized
+   content-length: 58
+   content-type: text/plain
+   date: Thu, 28 Feb 2019 01:07:10 GMT
+   server: envoy
+   ```
+
+4. Note that we've configured the `jwt-httpbin` URL to require JWTs, but the `httpbin` URL does not:
+
+   ```
+   curl -v http://$AMBASSADOR_IP/httpbin/ip
+   {
+      "origin": "108.20.119.124, 35.184.242.212, 108.20.119.124"
+   }
+   ```
+
+The JWT is validated using public keys supplied in a JWKS file. For the purposes of this demo, we're supplying a Datawire JWKS file. You can change the JWKS file by modifying the `filter.yaml` manifest and changing the `jwksURI` value.
+
 ## Key Takeaways
 
 * We're dynamically registering and resolving routes for services, e.g., in `consul-connect/qotm.yaml` and `httpbin.yaml`, new services are dynamically registered with Ambassador. Ambassador then uses Kubernetes DNS to resolve the actual IP address of these services.
