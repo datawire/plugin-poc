@@ -38,6 +38,6 @@ spec:
     spec:
       containers:
       - name: compositor
-        image: quay.io/datawire/compositor:ab473ab
+        image: quay.io/datawire/compositor:7c410c9
         ports:
         - containerPort: 8080
