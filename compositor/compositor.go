@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 
 	"golang.org/x/sync/errgroup"
@@ -12,7 +14,20 @@ import (
 type ExampleCompositor struct{}
 
 func (c *ExampleCompositor) SplitRequest(r *http.Request) ([]string, error) {
-	return []string{"http://httpbin.org/headers", "http://httpbin.org/ip"}, nil
+	var result []string
+	for _, url := range []string{"http://httpbin.org/stream", "http://qotm.default/quote"} {
+		result = append(result, resolve(url, r.URL.Path))
+	}
+	return result, nil
+}
+
+func resolve(base, relative string) string {
+	relative = strings.TrimLeft(relative, "/")
+	if relative == "" {
+		return base
+	} else {
+		return fmt.Sprintf("%s/%s", base, relative)
+	}
 }
 
 func (c *ExampleCompositor) JoinResponses(w http.ResponseWriter, r *http.Request, responses map[string]*http.Response) error {
