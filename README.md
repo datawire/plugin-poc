@@ -278,6 +278,31 @@ We'll now set up a custom Filter that will dynamically route between the QOTM se
 
 The JWT is validated using public keys supplied in a JWKS file. For the purposes of this demo, we're supplying a Datawire JWKS file. You can change the JWKS file by modifying the `filter.yaml` manifest and changing the `jwksURI` value.
 
+## Websockets
+
+1. Create the websockets service:
+
+   ```
+   kubectl apply -f websockets/ws_server.yaml
+   ```
+
+   This creates a websockets server running in Kubernetes. It also creates an Ambassador `Mapping` for routing websockets connections to the `prefix: /ws_sync/`.
+
+2. Add your $AMBASSADOR_IP to the HTML client:
+
+   ```html
+    50.        <script>
+    51.            var minus = document.querySelector('.minus'),
+    52.                plus = document.querySelector('.plus'),
+    53.                value = document.querySelector('.value'),
+    54.                users = document.querySelector('.users'),
+    55.                websocket = new WebSocket("ws://{AMBASSADOR_IP}/ws_sync/");
+   ```
+
+3. Open the HTML client in your favorite web browser.
+
+   This simple client increments or decrements a counter on the server. This counter is synchronized across all clients.
+
 ## Key Takeaways
 
 * We're dynamically registering and resolving routes for services, e.g., in `consul-connect/qotm.yaml` and `httpbin.yaml`, new services are dynamically registered with Ambassador. Ambassador then uses Kubernetes DNS to resolve the actual IP address of these services.
