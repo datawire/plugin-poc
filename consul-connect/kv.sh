@@ -1,0 +1,10 @@
+consul kv put 1 1
+consul kv put 2 2
+consul kv put 3 2
+consul kv put 4 3
+consul kv put 5 1
+consul kv put 6 3
+consul kv put 7 1
+consul kv put 8 2
+consul kv put 9 1
+consul kv put 10 2
