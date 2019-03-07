@@ -287,6 +287,56 @@ To configure this:
    {"hostname":"qotm-3-68b4844c8d-s8bdd","ok":true,"quote":"QOTM Service 3","time":"2019-03-07T22:52:26.932964","version":"1.3"}
    ```
 
+## Routing to VMs
+
+Ambassador can route to services running on VMs outside of Kubernetes. This can be done by either routing to the DNS name of the service running on the VM or by routing to the IP address using a Kubernetes `Endpoint` `Service`.
+
+The file vm-routing.yaml contains `Mapping`s that can do both.
+
+
+### DNS
+
+1. Edit the `service:` in the `dns_mapping` `Mapping`.
+
+   ```
+         ---
+         apiVersion: ambassador/v1
+         kind: Mapping
+         name: dns_mapping
+         prefix: /dns/
+         service: httpbin.org
+    ```
+
+2. `kubectl apply -f vm-routing.yaml`
+
+3. Send a request to `/dns/` over curl:
+
+   ```
+   curl $AMBASSADOR_IP/dns/
+   ```
+
+### IP
+
+1. Edit the `ip` and `port`in the `vm-routing` `Endpoint` to point to the IP of your VM
+
+   ```
+   subsets:
+     - addresses:
+         - ip: 34.197.95.106
+       ports:
+         - port: 80
+   ```
+
+2. `kubectl apply -f vm-routing.yaml`
+
+3. Send a request to `/ip-endpoint/` over curl:
+
+   ```
+   curl $AMBASSADOR_IP/dns/
+   ```
+
+**Note:** Both the `ip-endpoint` and `DNS` methods currently route to httpbin.org which is running on a VM outside of Ambassador for demonstration purposes.
+
 ## JWT
 
 1. Configure the JWT filter:
