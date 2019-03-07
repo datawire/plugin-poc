@@ -63,7 +63,7 @@ If the UI loads correctly and you see the consul service, it is safe to assume C
    kubectl apply -f ambassador-pro.yaml
    kubectl apply -f ambassador-service.yaml
    kubectl apply -f httpbin.yaml
-   kubectl apply -f consul-connect/qotm.yaml
+   kubectl apply -f consul-connect/qotm
    ```
 
 2. Get the IP address of Ambassador: `kubectl get svc ambassador`.
@@ -223,23 +223,119 @@ We will now set up distributed tracing using Zipkin.
     
 ## Dynamic Routing
 
-We'll now set up a custom Filter that will dynamically route between the QOTM service and micro donuts.
+Now we will configure a filter to dynamically route to different services based on the URL parameter `userID`. 
 
-1. We'll first deploy the custom Filter.
+If you run `kubectl get pods`, you will see we have 4 different instances of the QoTM pod running. 
+
+```shell
+$ kubectl get pods
+...
+qotm-1-7cdb6785d5-kp8g8                                      2/2     Running   0          2h
+qotm-2-5dddd9f558-f7msr                                      2/2     Running   0          3h
+qotm-3-68b4844c8d-s8bdd                                      2/2     Running   0          3h
+qotm-7f48dd8c97-rsfj5                                        2/2     Running   0          1h
+...
+```
+
+`qotm-1`, `qotm-2`, and `qotm-3` will simulate a request being routed to different versions of an app running in different data centers and `qotm` will act as a fall-back endpoint if the request doesn't belong to any of the three.
+
+`qotm-1`, `-2`, or `-3`are selected by getting the value of the `userID` URL parameter and querying a Consul Key-Value store for the service it should be routed to.
+
+To configure this:
+
+1. Create the Consul KV store with the provided KV-Pairs
+
+   ```shell
+   kubectl cp consul-connect/kv.sh consul-server-0:kv.sh
+   kubectl exec -it consul-server-0 -- sh kv.sh 
+   ```
+
+   This will create the following KV store:
+
+   | userID | DC |
+   |--------|----|
+   | 1      | 1  |
+   | 2      | 2  |
+   | 3      | 2  |
+   | 4      | 3  |
+   | 5      | 1  |
+   | 6      | 3  |
+   | 7      | 1  |
+   | 8      | 2  |
+   | 9      | 1  |
+   | 10     | 2  |
+
+2. Create the `Filter` and `FilterPolicy` that tells Ambassador to do this key-value lookup
+
+   ```shell
+   kubctl apply -f x-dc-filter.yaml
+   ```
+
+3. Test the dynamic routing with curl:
 
    ```
-   kubectl apply -f dynamic-route.yaml
-   kubectl apply -f ambassador-pro-auth.yaml
+   $ curl http://$AMBASSADOR_IP/qotm/?userID=1
+
+   {"hostname":"qotm-3-68b4844c8d-s8bdd","ok":true,"quote":"QOTM Service 1","time":"2019-03-07T22:52:26.932964","version":"1.3"}
+
+   $ curl http://$AMBASSADOR_IP/qotm/?userID=2
+
+   {"hostname":"qotm-3-68b4844c8d-s8bdd","ok":true,"quote":"QOTM Service 2","time":"2019-03-07T22:52:26.932964","version":"1.3"}
+
+   $ curl http://$AMBASSADOR_IP/qotm/?userID=4
+
+   {"hostname":"qotm-3-68b4844c8d-s8bdd","ok":true,"quote":"QOTM Service 3","time":"2019-03-07T22:52:26.932964","version":"1.3"}
    ```
 
-2. `curl` to the load balancer to test different variables:
+## Routing to VMs
+
+Ambassador can route to services running on VMs outside of Kubernetes. This can be done by either routing to the DNS name of the service running on the VM or by routing to the IP address using a Kubernetes `Endpoint` `Service`.
+
+The file vm-routing.yaml contains `Mapping`s that can do both.
+
+
+### DNS
+
+1. Edit the `service:` in the `dns_mapping` `Mapping`.
 
    ```
-   curl $IP/test/?db=1
-   curl $IP/test/?db=2
+         ---
+         apiVersion: ambassador/v1
+         kind: Mapping
+         name: dns_mapping
+         prefix: /dns/
+         service: httpbin.org
+    ```
+
+2. `kubectl apply -f vm-routing.yaml`
+
+3. Send a request to `/dns/` over curl:
+
+   ```
+   curl $AMBASSADOR_IP/dns/
    ```
 
-   Note that if the value is odd, you will go to QoTM service (you'll see a JSON blob). If the value is even, you will go to the microdonuts application (you'll see a stream of HTML). Note that both of these services are in the service mesh.
+### IP
+
+1. Edit the `ip` and `port`in the `vm-routing` `Endpoint` to point to the IP of your VM
+
+   ```
+   subsets:
+     - addresses:
+         - ip: 34.197.95.106
+       ports:
+         - port: 80
+   ```
+
+2. `kubectl apply -f vm-routing.yaml`
+
+3. Send a request to `/ip-endpoint/` over curl:
+
+   ```
+   curl $AMBASSADOR_IP/dns/
+   ```
+
+**Note:** Both the `ip-endpoint` and `DNS` methods currently route to httpbin.org which is running on a VM outside of Ambassador for demonstration purposes.
 
 ## JWT
 

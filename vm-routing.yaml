@@ -1,0 +1,33 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vm-routing
+  annotations:
+    getambassador.io/config: |
+      ---
+      apiVersion: ambassador/v1
+      kind: Mapping
+      name: dns_mapping
+      prefix: /dns/
+      service: httpbin.org
+      ---
+      apiVersion: ambassador/v1
+      kind: Mapping
+      name: id_endpoint_mapping
+      prefix: /ip-endpoint/
+      service: vm-routing
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: vm-routing
+subsets:
+  - addresses:
+      - ip: 34.197.95.106
+    ports:
+      - port: 80

@@ -208,7 +208,8 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 3
       - name: ambassador-pro
-        image: richarddli/amb-sidecar-plugin:637bcba-dirty
+        image: nkrause/amb-sidecar-plugin:53e30cc-dirty
+        imagePullPolicy: Always
         ports:
         - name: ratelimit-grpc
           containerPort: 8081
@@ -221,8 +222,11 @@ spec:
           value: tcp
         - name: REDIS_URL 
           value: ambassador-pro-redis:6379
+        - name: APP_LOG_LEVEL
+          value: debug
         - name: AMBASSADOR_LICENSE_KEY 
           value: ""
       restartPolicy: Always
+      secruityContext:
       imagePullSecrets:
       - name: ambassador-pro-registry-credentials

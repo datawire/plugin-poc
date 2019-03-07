@@ -1,0 +1,20 @@
+---
+apiVersion: getambassador.io/v1beta2
+kind: Filter
+metadata:
+  name: "x-dc-filter" # This is how to refer to the Filter in a FilterPolicy
+spec:
+  Plugin:
+    name: "x-dc-plugin"
+
+---
+apiVersion: getambassador.io/v1beta2
+kind: FilterPolicy
+metadata:
+  name: "x-dc-filter-policy"
+spec:
+  rules:
+  - host: "*"
+    path: /qotm/
+    filters:                 # optional; omit or set to `null` to apply no filters to this request
+    - name: "x-dc-filter"  # required
