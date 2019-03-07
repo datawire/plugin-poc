@@ -23,4 +23,12 @@ Note that the Compositor is taking a URL variable of `1` and passing it on to bo
 
 ## Configuring Compositor
 
-The Compositor `SplitRequest` function configures the target backend services. The `JoinResponses` function configures how the responses are aggregated. Both of these functions are designed to be modified by the end user as needed.
+The Compositor `SplitRequest` function configures the target backend services. The `JoinResponses` function configures how the responses are aggregated. Both of these functions are designed to be modified by the end user as needed. The following workflow should allow you to make changes to Compositor:
+
+1. Make the appropriate changes to the function(s) in `compositor.go`.
+
+2. Build the changes by typing `make DOCKER_REGISTRY=<your dockery registry>`. 
+
+3. Push the changes to your Docker repository: `docker push ...`.
+
+4. Update the `compositor.yaml` to point to your Docker image.
