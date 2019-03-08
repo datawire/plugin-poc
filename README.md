@@ -268,7 +268,8 @@ To configure this:
 2. Create the `Filter` and `FilterPolicy` that tells Ambassador to do this key-value lookup
 
    ```shell
-   kubctl apply -f x-dc-filter.yaml
+   kubectl apply -f ambassador-pro-auth.yaml
+   kubectl apply -f x-dc-filter.yaml
    ```
 
 3. Test the dynamic routing with curl:
