@@ -385,7 +385,7 @@ The JWT is validated using public keys supplied in a JWKS file. For the purposes
 
    This creates a websockets server running in Kubernetes. It also creates an Ambassador `Mapping` for routing websockets connections to the `prefix: /ws_sync/`.
 
-2. Add your $AMBASSADOR_IP to the HTML client:
+2. Add your $AMBASSADOR_IP to the HTML client (`/websockets/client.html`):
 
    ```html
     50.        <script>
