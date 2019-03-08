@@ -42,7 +42,7 @@ spec:
     spec:
       containers:
       - name: zipkin
-        image: openzipkin/zipkin
+        image: openzipkin/zipkin:2.11
         imagePullPolicy: Always
         ports:
         - name: http
