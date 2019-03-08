@@ -333,7 +333,7 @@ The file vm-routing.yaml contains `Mapping`s that can do both.
 3. Send a request to `/ip-endpoint/` over curl:
 
    ```
-   curl $AMBASSADOR_IP/dns/
+   curl $AMBASSADOR_IP/ip-endpoint/
    ```
 
 **Note:** Both the `ip-endpoint` and `DNS` methods currently route to httpbin.org which is running on a VM outside of Ambassador for demonstration purposes.
@@ -385,7 +385,7 @@ The JWT is validated using public keys supplied in a JWKS file. For the purposes
 
    This creates a websockets server running in Kubernetes. It also creates an Ambassador `Mapping` for routing websockets connections to the `prefix: /ws_sync/`.
 
-2. Add your $AMBASSADOR_IP to the HTML client (`/websockets/client.html`):
+2. Add your $AMBASSADOR_IP to the HTML client (`websockets/client.html`):
 
    ```html
     50.        <script>
