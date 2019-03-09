@@ -35,9 +35,15 @@ spec:
     metadata:
       labels:
         service: compositor
+      annotations:
+        "consul.hashicorp.com/connect-inject": "true"
+        "consul.hashicorp.com/connect-service-upstreams": "qotm:1234"
     spec:
       containers:
       - name: compositor
-        image: quay.io/datawire/compositor:7c410c9
+        image: quay.io/datawire/compositor:375db06
+        env:
+        - name: URLS
+          value: "http://httpbin.org/stream http://127.0.0.1:1234/quote"
         ports:
         - containerPort: 8080
