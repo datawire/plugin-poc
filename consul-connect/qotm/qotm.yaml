@@ -38,7 +38,7 @@ spec:
     spec:
       containers:
       - name: qotm
-        image: nkrause/qotm:notls
+        image: datawire/qotm:1.1
         ports:
         - name: http-api
           containerPort: 5000
