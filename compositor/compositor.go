@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 
@@ -13,9 +14,21 @@ import (
 
 type ExampleCompositor struct{}
 
+var (
+	URLS string
+)
+
+func init() {
+	val := os.Getenv("URLS")
+	if val == "" {
+		val = "http://httpbin.org/stream http://qotm.default/quote"
+	}
+	URLS = val
+}
+
 func (c *ExampleCompositor) SplitRequest(r *http.Request) ([]string, error) {
 	var result []string
-	for _, url := range []string{"http://httpbin.org/stream", "http://qotm.default/quote"} {
+	for _, url := range strings.Fields(URLS) {
 		result = append(result, resolve(url, r.URL.Path))
 	}
 	return result, nil
@@ -60,11 +73,19 @@ type compositorHandler struct {
 	compositor Compositor
 }
 
+func handleError(w http.ResponseWriter, r *http.Request, err error) {
+	log.Printf("%s [%p] ERROR: %s", r.RemoteAddr, r, err.Error())
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+}
+
 func (h *compositorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	urls, err := h.compositor.SplitRequest(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handleError(w, r, err)
+		return
 	}
+
+	log.Printf("%s [%p] splitting %s -> %s", r.RemoteAddr, r, r.URL, urls)
 
 	var mu sync.Mutex
 	responses := make(map[string]*http.Response)
@@ -85,12 +106,12 @@ func (h *compositorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	err = group.Wait()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handleError(w, r, err)
 		return
 	}
 	err = h.compositor.JoinResponses(w, r, responses)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handleError(w, r, err)
 		return
 	}
 }
