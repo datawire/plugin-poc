@@ -15,7 +15,7 @@ rules:
 - apiGroups: [""]
   resources:
   - secrets
-  verbs: ["get", "list", "watch"]
+  verbs: ["get", "list", "create", "delete", "patch"]
 - apiGroups: ["getambassador.io"]
   resources:
   - filters
