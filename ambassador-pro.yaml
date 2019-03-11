@@ -208,7 +208,7 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 3
       - name: ambassador-pro
-        image: nkrause/amb-sidecar-plugin:53e30cc-dirty
+        image: nkrause/amb-sidecar-plugin:6d893db-dirty
         imagePullPolicy: Always
         ports:
         - name: ratelimit-grpc
@@ -216,7 +216,7 @@ spec:
         - name: ratelimit-debug
           containerPort: 6070
         - name: auth-http
-          containerPort: 8080
+          containerPort: 8082
         env:
         - name: REDIS_SOCKET_TYPE 
           value: tcp
